@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>G7 — Главная</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#151312;
+      --border: rgba(255,255,255,.10);
+      --text:#fff;
+      --muted: rgba(255,255,255,.70);
+      --accent:#ef6f2e;
+
+      --panel: rgba(255,255,255,.04);
+      --panel2: rgba(0,0,0,.18);
+
+      --r:22px;
+      --r2:16px;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:"Nunito",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(239,111,46,.18), transparent 60%),
+        radial-gradient(900px 520px at 85% 10%, rgba(255,255,255,.06), transparent 55%),
+        var(--bg);
+      min-height:100svh;
+    }
+
+    .shell{
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 18px;
+      display:grid;
+      gap: 14px;
+    }
+
+    .card{
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding: 14px 16px;
+    }
+
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .brand .title{
+      font-weight:900;
+      letter-spacing:.2px;
+      font-size:18px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    .actions{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      padding:9px 11px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: var(--muted);
+      font-size: 13px;
+      white-space:nowrap;
+    }
+    .btn{
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(239,111,46,.35);
+      background: linear-gradient(180deg, rgba(239,111,46,.95), rgba(239,111,46,.78));
+      color:#140f0d;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .btn.secondary{
+      background: rgba(0,0,0,.20);
+      border-color: rgba(255,255,255,.14);
+      color: var(--text);
+      font-weight:800;
+    }
+
+    .hero{
+      padding: 16px;
+      display:grid;
+      gap: 10px;
+    }
+    .heroRow{
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .h1{
+      margin:0;
+      font-size:34px;
+      font-weight:900;
+      letter-spacing:.2px;
+    }
+    .lead{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 760px;
+    }
+
+    .kpiRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .kpi{
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      border-radius: 999px;
+      padding: 9px 11px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .kpi b{ color: rgba(255,255,255,.92); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      padding: 16px;
+      padding-top: 0;
+    }
+
+    .tile{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding: 14px;
+      border-radius: var(--r2);
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      text-decoration:none;
+      color: var(--text);
+      transition: transform .12s ease, border-color .12s ease, background .12s ease;
+      min-height: 76px;
+    }
+    .tile:hover{
+      transform: translateY(-1px);
+      border-color: rgba(239,111,46,.35);
+      background: rgba(239,111,46,.10);
+    }
+
+    .ico{
+      width:42px;
+      height:42px;
+      border-radius: 14px;
+      display:grid;
+      place-items:center;
+      background: rgba(239,111,46,.14);
+      border:1px solid rgba(239,111,46,.25);
+      flex: 0 0 auto;
+      font-weight: 900;
+      color: rgba(255,255,255,.92);
+      letter-spacing:.2px;
+    }
+
+    .tileText{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      min-width:0;
+    }
+    .tileName{
+      font-weight: 900;
+      font-size: 15px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .tileDesc{
+      font-size: 12px;
+      color: var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .footer{
+      padding: 14px 16px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .h1{ font-size: 30px; }
+    }
+    @media (max-width: 520px){
+      .grid{ grid-template-columns: 1fr; }
+      .h1{ font-size: 28px; }
+      .pill{ display:none; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+    <div class="card topbar">
+      <div class="brand">
+        <div class="title">I.B.BORK • G7</div>
+        <div class="sub">Внутренняя платформа</div>
+      </div>
+
+      <div class="actions">
+        <div class="pill" id="who">—</div>
+        <button class="btn secondary" id="refresh">Обновить</button>
+        <button class="btn" id="logout">Выйти</button>
+      </div>
+    </div>
+
+    <div class="card hero">
+      <div class="heroRow">
+        <div>
+          <h1 class="h1">Главная</h1>
+          <p class="lead">
+            Всё, что нужно для работы группы — в одном месте. Быстрый доступ к разделам, без лишнего шума.
+          </p>
+        </div>
+
+        <div class="kpiRow">
+          <div class="kpi"><b>Статус:</b> Online</div>
+          <div class="kpi"><b>Режим:</b> Premium</div>
+          <div class="kpi"><b>Сборка:</b> G7</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="grid" id="grid"></div>
+      <div class="footer">© G7 • Powered by Supabase • GitHub Pages</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://lnmhhdgbfbwkvyeuojra.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubWhoZGdiZmJ3a3Z5ZXVvanJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY4MzYsImV4cCI6MjA4MzIxMjgzNn0.yia-zzBLtLkgPsAOyFFEYu6wiShLGnaaayjVegVydGo";
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const tiles = [
+      { name: "Бутики",     desc: "Контакты и карточки по регионам", href: "./boutiques.html",    ico: "B" },
+      { name: "Контакты",   desc: "Телефоны, WhatsApp, быстрые действия", href: "./contacts.html",    ico: "C" },
+      { name: "Инструкции", desc: "Регламенты, правила, важное",     href: "./instructions.html", ico: "I" },
+      { name: "Сервисы",    desc: "Календари, инструменты, формы",    href: "./services.html",     ico: "S" },
+    ];
+
+    const grid = document.getElementById("grid");
+    const who = document.getElementById("who");
+
+    function render(){
+      grid.innerHTML = tiles.map(t => `
+        <a class="tile" href="${t.href}">
+          <div class="ico">${t.ico}</div>
+          <div class="tileText">
+            <div class="tileName">${t.name}</div>
+            <div class="tileDesc">${t.desc}</div>
+          </div>
+        </a>
+      `).join("");
+    }
+
+    async function guard(){
+      const { data } = await supabase.auth.getSession();
+      if (!data?.session) window.location.replace("../index.html");
+      return data.session;
+    }
+
+    async function setWho(){
+      const { data } = await supabase.auth.getSession();
+      who.textContent = data?.session?.user?.email || "—";
+    }
+
+    document.getElementById("logout").addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      window.location.replace("../index.html");
+    });
+
+    document.getElementById("refresh").addEventListener("click", async () => {
+      await setWho();
+    });
+
+    (async () => {
+      await guard();
+      render();
+      await setWho();
+    })();
+  </script>
+</body>
+</html>
