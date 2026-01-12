@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>G7 — Главная</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body{
+      margin:0;
+      min-height:100svh;
+      display:grid;
+      place-items:center;
+      background:#151312;
+      color:#fff;
+      font-family:Nunito, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    }
+    .card{
+      padding:28px;
+      border-radius:20px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.04);
+      width:min(520px, 100%);
+    }
+    h1{ margin:0 0 10px; }
+    p{ margin:0 0 20px; color:rgba(255,255,255,.7); }
+    button{
+      padding:12px 16px;
+      border-radius:14px;
+      border:1px solid rgba(239,111,46,.35);
+      background:#ef6f2e;
+      color:#140f0d;
+      font-weight:800;
+      cursor:pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>G7</h1>
+    <p>Ты успешно авторизован. Это главная страница.</p>
+    <button id="logout">Выйти</button>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://lnmhhdgbfbwkvyeuojra.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubWhoZGdiZmJ3a3Z5ZXVvanJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY4MzYsImV4cCI6MjA4MzIxMjgzNn0.yia-zzBLtLkgPsAOyFFEYu6wiShLGnaaayjVegVydGo";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // 🔒 Защита страницы
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      window.location.replace("./index.html");
+    }
+
+    // 🚪 Выход
+    document.getElementById("logout").onclick = async () => {
+      await supabase.auth.signOut();
+      window.location.replace("./index.html");
+    };
+  </script>
+</body>
+</html>

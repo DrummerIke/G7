@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>G7 — Вход</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- hCaptcha -->
+  <script src="https://js.hcaptcha.com/1/api.js" async defer></script>
+
+  <style>
+    :root{
+      --bg:#151312;
+      --border: rgba(255,255,255,.10);
+      --text:#fff;
+      --muted: rgba(255,255,255,.72);
+      --accent:#ef6f2e;
+      --shadow: 0 18px 60px rgba(0,0,0,.45);
+      --r:22px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family:"Nunito",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(239,111,46,.18), transparent 60%),
+        radial-gradient(900px 520px at 85% 10%, rgba(255,255,255,.06), transparent 55%),
+        var(--bg);
+      min-height:100svh;
+      display:grid;
+      place-items:center;
+      padding:18px;
+      color:var(--text);
+    }
+    .card{
+      width:min(520px, 100%);
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding:22px;
+    }
+    h1{
+      margin:0 0 14px;
+      font-size:28px;
+      letter-spacing:.2px;
+    }
+    label{
+      display:block;
+      margin:12px 0 8px;
+      font-size:14px;
+      color:var(--muted);
+      font-weight:800;
+    }
+    input{
+      width:100%;
+      padding:14px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(0,0,0,.18);
+      color:var(--text);
+      font-size:16px;
+      outline:none;
+    }
+    input:focus{
+      border-color: rgba(239,111,46,.45);
+      box-shadow:0 0 0 4px rgba(239,111,46,.12);
+    }
+    .captchaWrap{
+      margin-top:14px;
+      display:flex;
+      justify-content:flex-start;
+    }
+    .btn{
+      margin-top:16px;
+      width:100%;
+      padding:14px 16px;
+      border-radius:16px;
+      border:1px solid rgba(239,111,46,.35);
+      background: linear-gradient(180deg, rgba(239,111,46,.95), rgba(239,111,46,.78));
+      color:#140f0d;
+      font-weight:900;
+      cursor:pointer;
+    }
+    .btn[disabled]{ opacity:.6; cursor:not-allowed; }
+    .msg{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid var(--border);
+      background: rgba(255,255,255,.03);
+      color:var(--muted);
+      font-size:13px;
+      min-height:42px;
+      display:flex;
+      align-items:center;
+      word-break: break-word;
+    }
+    .msg.err{ border-color: rgba(255,90,90,.35); color: rgba(255,220,220,.95); }
+    .hint{
+      margin-top:10px;
+      padding:10px 12px;
+      border-radius:14px;
+      border:1px solid rgba(239,111,46,.22);
+      background: rgba(239,111,46,.10);
+      font-size:13px;
+      display:none;
+    }
+    code{ color:#fff; }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>G7 — Вход</h1>
+
+    <label for="login">Логин</label>
+    <input id="login" autocomplete="username" placeholder="chig" />
+
+    <label for="password">Пароль</label>
+    <input id="password" type="password" autocomplete="current-password" placeholder="••••••••••••" />
+
+    <div class="captchaWrap">
+      <!-- твой sitekey -->
+      <div class="h-captcha" data-sitekey="9e209c1e-efde-4ba8-bc48-a3ce7f02e684"></div>
+    </div>
+
+    <button class="btn" id="btnLogin">Войти</button>
+
+    <div class="hint" id="hintHost"></div>
+    <div class="msg" id="msg">Введите логин, пароль и пройдите проверку.</div>
+  </div>
+
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+    const SUPABASE_URL = "https://lnmhhdgbfbwkvyeuojra.supabase.co";
+    const SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubWhoZGdiZmJ3a3Z5ZXVvanJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY4MzYsImV4cCI6MjA4MzIxMjgzNn0.yia-zzBLtLkgPsAOyFFEYu6wiShLGnaaayjVegVydGo";
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const el = (id) => document.getElementById(id);
+    const msg = el("msg");
+    const btn = el("btnLogin");
+    const hintHost = el("hintHost");
+
+    function setMsg(text, kind=""){
+      msg.className = "msg" + (kind ? " " + kind : "");
+      msg.textContent = text;
+    }
+
+    // подсказка про localhost
+    (function(){
+      const h = location.hostname;
+      if (location.protocol === "file:" || h === "localhost") {
+        hintHost.style.display = "block";
+        hintHost.innerHTML =
+          `Открой через <code>http://127.0.0.1:PORT</code>, а не <code>file://</code> или <code>localhost</code>.`;
+      }
+    })();
+
+    async function resolveLogin(login){
+      const res = await supabase.functions.invoke("resolve_login", { body:{ login } });
+      if (res.error) throw new Error("resolve_login failed");
+      if (!res.data?.email) throw new Error("login_not_found");
+      return res.data.email;
+    }
+
+    btn.onclick = async () => {
+      const login = el("login").value.trim().toLowerCase();
+      const password = el("password").value;
+      const captchaToken = window.hcaptcha?.getResponse?.();
+
+      if (!login || !password) return setMsg("Заполните логин и пароль", "err");
+      if (!captchaToken) return setMsg("Пройдите hCaptcha", "err");
+
+      btn.disabled = true;
+      try{
+        setMsg("Проверяю доступ…");
+        const email = await resolveLogin(login);
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+          options:{ captchaToken }
+        });
+        if (error) throw error;
+
+        // ✅ УСПЕХ → в приложение
+        window.location.href = "./app.html";
+
+      }catch(e){
+        setMsg(e.message || "Ошибка входа", "err");
+        window.hcaptcha?.reset?.();
+      }finally{
+        btn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
