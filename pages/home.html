@@ -37,12 +37,57 @@
       min-height:100svh;
     }
 
+    /* ===== Preloader ===== */
+    .loading{
+      position:fixed; inset:0;
+      display:grid; place-items:center;
+      background:
+        radial-gradient(1200px 700px at 20% -10%, rgba(239,111,46,.16), transparent 60%),
+        radial-gradient(900px 520px at 85% 10%, rgba(255,255,255,.05), transparent 55%),
+        var(--bg);
+      z-index:50;
+    }
+    .loaderCard{
+      width:min(520px, 92vw);
+      border:1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      padding:18px;
+      display:flex;
+      align-items:center;
+      gap:14px;
+    }
+    .spinner{
+      width:34px; height:34px;
+      border-radius:999px;
+      border:2px solid rgba(255,255,255,.16);
+      border-top-color: rgba(239,111,46,.95);
+      animation: spin .85s linear infinite;
+      flex: 0 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loaderText{
+      display:flex; flex-direction:column; gap:2px;
+      min-width:0;
+    }
+    .loaderText b{ font-size:14px; letter-spacing:.2px; }
+    .loaderText span{ font-size:12px; color:var(--muted); }
+
+    /* ===== Page ===== */
     .shell{
       max-width: 1220px;
       margin: 0 auto;
       padding: 18px;
       display:grid;
       gap: 14px;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .shell.ready{
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .card{
@@ -173,11 +218,16 @@
       color: var(--text);
       transition: transform .12s ease, border-color .12s ease, background .12s ease;
       min-height: 76px;
+      outline: none;
     }
     .tile:hover{
       transform: translateY(-1px);
       border-color: rgba(239,111,46,.35);
       background: rgba(239,111,46,.10);
+    }
+    .tile:focus-visible{
+      box-shadow: 0 0 0 4px rgba(239,111,46,.14);
+      border-color: rgba(239,111,46,.45);
     }
 
     .ico{
@@ -189,9 +239,14 @@
       background: rgba(239,111,46,.14);
       border:1px solid rgba(239,111,46,.25);
       flex: 0 0 auto;
-      font-weight: 900;
-      color: rgba(255,255,255,.92);
-      letter-spacing:.2px;
+    }
+    .ico svg{
+      width:22px; height:22px;
+      stroke: rgba(255,255,255,.92);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .tileText{
@@ -234,7 +289,19 @@
 </head>
 
 <body>
-  <div class="shell">
+  <!-- Preloader -->
+  <div class="loading" id="loading">
+    <div class="loaderCard">
+      <div class="spinner"></div>
+      <div class="loaderText">
+        <b>G7</b>
+        <span>Проверка доступа…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Page -->
+  <div class="shell" id="shell" aria-hidden="true">
     <div class="card topbar">
       <div class="brand">
         <div class="title">I.B.BORK • G7</div>
@@ -279,20 +346,57 @@
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubWhoZGdiZmJ3a3Z5ZXVvanJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY4MzYsImV4cCI6MjA4MzIxMjgzNn0.yia-zzBLtLkgPsAOyFFEYu6wiShLGnaaayjVegVydGo";
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    const $loading = document.getElementById("loading");
+    const $shell = document.getElementById("shell");
+    const $who = document.getElementById("who");
+    const $grid = document.getElementById("grid");
+
+    const icons = {
+      boutiques: `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 7h16" />
+          <path d="M6 7l1-3h10l1 3" />
+          <path d="M6 10v10" />
+          <path d="M10 10v10" />
+          <path d="M14 10v10" />
+          <path d="M18 10v10" />
+          <path d="M4 20h16" />
+        </svg>
+      `,
+      contacts: `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M16 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" />
+          <path d="M9 6h6" />
+          <path d="M9 18h6" />
+        </svg>
+      `,
+      instructions: `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <path d="M14 2v6h6" />
+          <path d="M8 13h8" />
+          <path d="M8 17h8" />
+        </svg>
+      `,
+      services: `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+          <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.2-2-3.4-2.3.7a7.6 7.6 0 0 0-1.7-1L15 4h-6l-.5 3.1a7.6 7.6 0 0 0-1.7 1L4.5 7.4l-2 3.4L4.5 12a7.8 7.8 0 0 0 .1 2l-2 1.2 2 3.4 2.3-.7a7.6 7.6 0 0 0 1.7 1L9 22h6l.5-3.1a7.6 7.6 0 0 0 1.7-1l2.3.7 2-3.4z" />
+        </svg>
+      `
+    };
+
     const tiles = [
-      { name: "Бутики",     desc: "Контакты и карточки по регионам", href: "./boutiques.html",    ico: "B" },
-      { name: "Контакты",   desc: "Телефоны, WhatsApp, быстрые действия", href: "./contacts.html",    ico: "C" },
-      { name: "Инструкции", desc: "Регламенты, правила, важное",     href: "./instructions.html", ico: "I" },
-      { name: "Сервисы",    desc: "Календари, инструменты, формы",    href: "./services.html",     ico: "S" },
+      { key:"boutiques",  name:"Бутики",     desc:"Контакты и карточки по регионам", href:"./boutiques.html" },
+      { key:"contacts",   name:"Контакты",   desc:"Телефоны, WhatsApp, быстрые действия", href:"./contacts.html" },
+      { key:"instructions", name:"Инструкции", desc:"Регламенты, правила, важное", href:"./instructions.html" },
+      { key:"services",   name:"Сервисы",    desc:"Календари, инструменты, формы", href:"./services.html" },
     ];
 
-    const grid = document.getElementById("grid");
-    const who = document.getElementById("who");
-
-    function render(){
-      grid.innerHTML = tiles.map(t => `
+    function renderTiles(){
+      $grid.innerHTML = tiles.map(t => `
         <a class="tile" href="${t.href}">
-          <div class="ico">${t.ico}</div>
+          <div class="ico">${icons[t.key]}</div>
           <div class="tileText">
             <div class="tileName">${t.name}</div>
             <div class="tileDesc">${t.desc}</div>
@@ -309,7 +413,13 @@
 
     async function setWho(){
       const { data } = await supabase.auth.getSession();
-      who.textContent = data?.session?.user?.email || "—";
+      $who.textContent = data?.session?.user?.email || "—";
+    }
+
+    function reveal(){
+      $loading.style.display = "none";
+      $shell.classList.add("ready");
+      $shell.setAttribute("aria-hidden", "false");
     }
 
     document.getElementById("logout").addEventListener("click", async () => {
@@ -323,8 +433,9 @@
 
     (async () => {
       await guard();
-      render();
+      renderTiles();
       await setWho();
+      reveal();
     })();
   </script>
 </body>
