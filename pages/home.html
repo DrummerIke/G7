@@ -16,10 +16,6 @@
       --text:#fff;
       --muted: rgba(255,255,255,.70);
       --accent:#ef6f2e;
-
-      --panel: rgba(255,255,255,.04);
-      --panel2: rgba(0,0,0,.18);
-
       --r:22px;
       --r2:16px;
       --shadow: 0 18px 60px rgba(0,0,0,.45);
@@ -105,13 +101,39 @@
       padding: 14px 16px;
     }
 
-    .brand{
+    /* Home brand (logo + text) */
+    .homeBrand{
       display:flex;
-      flex-direction:column;
-      gap:2px;
+      align-items:center;
+      gap:10px;
+      text-decoration:none;
+      color:inherit;
       min-width:0;
+      border-radius:16px;
+      padding:6px 8px;
+      margin:-6px -8px;
+      transition: background .12s ease, transform .12s ease;
     }
-    .brand .title{
+    .homeBrand:hover{
+      background: rgba(239,111,46,.08);
+      transform: translateY(-1px);
+    }
+    .homeBrand:focus-visible{
+      outline:none;
+      box-shadow: 0 0 0 4px rgba(239,111,46,.14);
+    }
+    .homeLogo{
+      width:28px;
+      height:28px;
+      object-fit:contain;
+      border-radius:10px;
+      background: rgba(239,111,46,.08);
+      border:1px solid rgba(239,111,46,.22);
+      padding:4px;
+      flex: 0 0 auto;
+    }
+    .brandText{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+    .title{
       font-weight:900;
       letter-spacing:.2px;
       font-size:18px;
@@ -119,9 +141,12 @@
       overflow:hidden;
       text-overflow:ellipsis;
     }
-    .brand .sub{
+    .sub{
       font-size:12px;
       color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
     }
 
     .actions{
@@ -303,10 +328,13 @@
   <!-- Page -->
   <div class="shell" id="shell" aria-hidden="true">
     <div class="card topbar">
-      <div class="brand">
-        <div class="title">I.B.BORK • G7</div>
-        <div class="sub">Внутренняя платформа</div>
-      </div>
+      <a class="homeBrand" href="./home.html" title="На главную">
+        <img class="homeLogo" src="./Logo.png" alt="G7" />
+        <div class="brandText">
+          <div class="title">I.B.BORK • G7</div>
+          <div class="sub">Внутренняя платформа</div>
+        </div>
+      </a>
 
       <div class="actions">
         <div class="pill" id="who">—</div>
