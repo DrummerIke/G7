@@ -15,6 +15,9 @@
   --muted:rgba(255,255,255,.65);
   --accent:#ef6f2e;
   --r:20px;
+
+  --icon-size:42px;
+  --icon-radius:14px;
 }
 
 *{box-sizing:border-box}
@@ -57,54 +60,89 @@ body{
   background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
 }
 
-/* Logo */
+/* ===== Logo (no background, x2 size, subtle hover) ===== */
 .logo{
   display:flex;
   align-items:center;
+  background:transparent !important;
+  border:none !important;
+  padding:0;
+  text-decoration:none;
 }
 .logo img{
-  height:44px;
+  height:88px;           /* x2 */
   width:auto;
+  display:block;
+  background:transparent !important;
+  box-shadow:none !important;
+  transform:translateZ(0);
+  transition:transform .18s ease, filter .18s ease, opacity .18s ease;
+  opacity:.98;
+}
+.logo:hover img{
+  transform:translateY(-1px) scale(1.02);
+  filter:drop-shadow(0 10px 26px rgba(239,111,46,.18));
+  opacity:1;
+}
+.logo:active img{
+  transform:translateY(0) scale(0.995);
+  filter:drop-shadow(0 6px 18px rgba(239,111,46,.12));
 }
 
-/* Nav icons */
+/* ===== Nav icons ===== */
 .nav{
   display:flex;
   align-items:center;
   gap:14px;
+  margin-left:28px; /* ← сдвиг вправо, чтобы логотип "дышал" */
 }
 
+/* Button */
 .iconBtn{
-  width:42px;
-  height:42px;
-  border-radius:14px;
+  width:var(--icon-size);
+  height:var(--icon-size);
+  border-radius:var(--icon-radius);
   display:grid;
   place-items:center;
   border:1px solid var(--border);
   background:rgba(0,0,0,.25);
   cursor:pointer;
-  transition:.15s;
+  transition:background .15s ease, border-color .15s ease, transform .15s ease;
+  user-select:none;
 }
 .iconBtn:hover{
-  background:rgba(239,111,46,.15);
-  border-color:rgba(239,111,46,.4);
+  background:rgba(239,111,46,.12);
+  border-color:rgba(239,111,46,.38);
+  transform:translateY(-1px);
+}
+.iconBtn:active{
+  transform:translateY(0px);
 }
 .iconBtn svg{
   width:20px;height:20px;
   stroke:white;
   fill:none;
   stroke-width:2;
+  opacity:.95;
 }
 
-/* Settings menu */
-.settings{
-  position:relative;
+/* ===== Active state ===== */
+.iconBtn.active{
+  background:rgba(239,111,46,.18);
+  border-color:rgba(239,111,46,.55);
+  box-shadow:0 0 0 3px rgba(239,111,46,.10);
 }
+.iconBtn.active svg{
+  opacity:1;
+}
+
+/* ===== Settings menu ===== */
+.settings{position:relative;}
 .menu{
   position:absolute;
   right:0;
   top:52px;
-  min-width:160px;
+  min-width:180px;
   background:#1b1918;
   border:1px solid var(--border);
   border-radius:14px;
@@ -121,9 +159,16 @@ body{
   border-radius:10px;
   text-align:left;
   cursor:pointer;
+  font:inherit;
 }
-.menu button:hover{
-  background:rgba(239,111,46,.15);
+.menu button:hover{background:rgba(239,111,46,.15)}
+
+/* Responsive tweak */
+@media (max-width:700px){
+  .topbar{padding:12px 12px}
+  .logo img{height:64px}
+  .nav{gap:10px; margin-left:14px}
+  :root{--icon-size:40px}
 }
 </style>
 </head>
@@ -132,34 +177,33 @@ body{
 <div id="loading"><div class="spinner"></div></div>
 
 <div class="topbar" id="app" style="display:none">
-  <div class="logo">
+  <!-- Logo as Home -->
+  <a class="logo" href="./home.html" title="На главную">
     <img src="./Logo.png" alt="G7" />
-  </div>
+  </a>
 
-  <div class="nav">
-    <!-- Бутики -->
-    <div class="iconBtn" title="Бутики">
+  <!-- Icons -->
+  <div class="nav" id="nav">
+    <div class="iconBtn" data-target="boutiques" title="Бутики" role="button" tabindex="0">
       <svg viewBox="0 0 24 24"><path d="M3 7h18M5 7l1-3h12l1 3M5 10v10M9 10v10M15 10v10M19 10v10"/></svg>
     </div>
 
-    <!-- Контакты -->
-    <div class="iconBtn" title="Контакты">
+    <div class="iconBtn" data-target="contacts" title="Контакты" role="button" tabindex="0">
       <svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M9 6h6M9 18h6"/></svg>
     </div>
 
-    <!-- Инструкции -->
-    <div class="iconBtn" title="Инструкции">
+    <div class="iconBtn" data-target="docs" title="Инструкции" role="button" tabindex="0">
       <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
     </div>
 
-    <!-- Settings -->
     <div class="settings">
-      <div class="iconBtn" title="Настройки">
+      <div class="iconBtn" data-target="settings" title="Настройки" role="button" tabindex="0">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.2-2-3.4-2.3.7a7.6 7.6 0 0 0-1.7-1L15 4h-6l-.5 3.1a7.6 7.6 0 0 0-1.7 1L4.5 7.4l-2 3.4L4.5 12a7.8 7.8 0 0 0 .1 2l-2 1.2 2 3.4 2.3-.7a7.6 7.6 0 0 0 1.7 1L9 22h6l.5-3.1a7.6 7.6 0 0 0 1.7-1l2.3.7 2-3.4z"/></svg>
       </div>
+
       <div class="menu">
-        <button>Личный кабинет</button>
-        <button id="logout">Выйти</button>
+        <button type="button" id="profile">Личный кабинет</button>
+        <button type="button" id="logout">Выйти</button>
       </div>
     </div>
   </div>
@@ -173,15 +217,45 @@ const supabase = createClient(
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubWhoZGdiZmJ3a3Z5ZXVvanJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY4MzYsImV4cCI6MjA4MzIxMjgzNn0.yia-zzBLtLkgPsAOyFFEYu6wiShLGnaaayjVegVydGo"
 );
 
+// Guard
 const { data } = await supabase.auth.getSession();
-if(!data.session) location.replace("../index.html");
+if (!data.session) location.replace("../index.html");
 
-document.getElementById("loading").style.display="none";
-document.getElementById("app").style.display="flex";
+// Show UI
+document.getElementById("loading").style.display = "none";
+document.getElementById("app").style.display = "flex";
 
+// Active state logic
+const nav = document.getElementById("nav");
+const buttons = [...nav.querySelectorAll(".iconBtn[data-target]")];
+
+function setActive(target){
+  buttons.forEach(b => b.classList.toggle("active", b.dataset.target === target));
+  // сохраняем (чтобы при перезагрузке подсветка оставалась)
+  localStorage.setItem("g7_active_tab", target);
+}
+
+// Default active = saved or "docs" (можешь поменять)
+setActive(localStorage.getItem("g7_active_tab") || "docs");
+
+// Click handlers (пока без переходов — потом подключим реальные страницы)
+buttons.forEach(btn=>{
+  if(btn.dataset.target === "settings") return;
+  btn.addEventListener("click", ()=> setActive(btn.dataset.target));
+  btn.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter" || e.key === " ") { e.preventDefault(); setActive(btn.dataset.target); }
+  });
+});
+
+// Menu actions
 document.getElementById("logout").onclick = async ()=>{
   await supabase.auth.signOut();
   location.replace("../index.html");
+};
+
+document.getElementById("profile").onclick = ()=>{
+  // позже сделаем страницу /pages/profile.html
+  alert("Личный кабинет — добавим следующим шагом.");
 };
 </script>
 </body>
