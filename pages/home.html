@@ -1,470 +1,188 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>G7 — Главная</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>G7</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
 
-  <style>
-    :root{
-      --bg:#151312;
-      --border: rgba(255,255,255,.10);
-      --text:#fff;
-      --muted: rgba(255,255,255,.70);
-      --accent:#ef6f2e;
-      --r:22px;
-      --r2:16px;
-      --shadow: 0 18px 60px rgba(0,0,0,.45);
-    }
+<style>
+:root{
+  --bg:#151312;
+  --border:rgba(255,255,255,.10);
+  --text:#fff;
+  --muted:rgba(255,255,255,.65);
+  --accent:#ef6f2e;
+  --r:20px;
+}
 
-    *{ box-sizing:border-box; }
-    body{
-      margin:0;
-      font-family:"Nunito",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(1200px 700px at 20% -10%, rgba(239,111,46,.18), transparent 60%),
-        radial-gradient(900px 520px at 85% 10%, rgba(255,255,255,.06), transparent 55%),
-        var(--bg);
-      min-height:100svh;
-    }
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Nunito,system-ui;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 600px at 15% -10%, rgba(239,111,46,.20), transparent 60%),
+    var(--bg);
+  min-height:100svh;
+}
 
-    /* ===== Preloader ===== */
-    .loading{
-      position:fixed; inset:0;
-      display:grid; place-items:center;
-      background:
-        radial-gradient(1200px 700px at 20% -10%, rgba(239,111,46,.16), transparent 60%),
-        radial-gradient(900px 520px at 85% 10%, rgba(255,255,255,.05), transparent 55%),
-        var(--bg);
-      z-index:50;
-    }
-    .loaderCard{
-      width:min(520px, 92vw);
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-      padding:18px;
-      display:flex;
-      align-items:center;
-      gap:14px;
-    }
-    .spinner{
-      width:34px; height:34px;
-      border-radius:999px;
-      border:2px solid rgba(255,255,255,.16);
-      border-top-color: rgba(239,111,46,.95);
-      animation: spin .85s linear infinite;
-      flex: 0 0 auto;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loaderText{
-      display:flex; flex-direction:column; gap:2px;
-      min-width:0;
-    }
-    .loaderText b{ font-size:14px; letter-spacing:.2px; }
-    .loaderText span{ font-size:12px; color:var(--muted); }
+/* ===== Preloader ===== */
+#loading{
+  position:fixed; inset:0;
+  display:grid; place-items:center;
+  background:var(--bg);
+  z-index:10;
+}
+.spinner{
+  width:36px;height:36px;
+  border-radius:50%;
+  border:2px solid rgba(255,255,255,.2);
+  border-top-color:var(--accent);
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-    /* ===== Page ===== */
-    .shell{
-      max-width: 1220px;
-      margin: 0 auto;
-      padding: 18px;
-      display:grid;
-      gap: 14px;
-      opacity: 0;
-      transform: translateY(6px);
-      transition: opacity .18s ease, transform .18s ease;
-    }
-    .shell.ready{
-      opacity: 1;
-      transform: translateY(0);
-    }
+/* ===== Topbar ===== */
+.topbar{
+  max-width:1200px;
+  margin:14px auto;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+}
 
-    .card{
-      border:1px solid var(--border);
-      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border-radius: var(--r);
-      box-shadow: var(--shadow);
-    }
+/* Logo */
+.logo{
+  display:flex;
+  align-items:center;
+}
+.logo img{
+  height:44px;
+  width:auto;
+}
 
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding: 14px 16px;
-    }
+/* Nav icons */
+.nav{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
 
-    /* Home brand (logo + text) */
-    .homeBrand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      text-decoration:none;
-      color:inherit;
-      min-width:0;
-      border-radius:16px;
-      padding:6px 8px;
-      margin:-6px -8px;
-      transition: background .12s ease, transform .12s ease;
-    }
-    .homeBrand:hover{
-      background: rgba(239,111,46,.08);
-      transform: translateY(-1px);
-    }
-    .homeBrand:focus-visible{
-      outline:none;
-      box-shadow: 0 0 0 4px rgba(239,111,46,.14);
-    }
-    .homeLogo{
-      width:28px;
-      height:28px;
-      object-fit:contain;
-      border-radius:10px;
-      background: rgba(239,111,46,.08);
-      border:1px solid rgba(239,111,46,.22);
-      padding:4px;
-      flex: 0 0 auto;
-    }
-    .brandText{ display:flex; flex-direction:column; gap:2px; min-width:0; }
-    .title{
-      font-weight:900;
-      letter-spacing:.2px;
-      font-size:18px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .sub{
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
+.iconBtn{
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  display:grid;
+  place-items:center;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.25);
+  cursor:pointer;
+  transition:.15s;
+}
+.iconBtn:hover{
+  background:rgba(239,111,46,.15);
+  border-color:rgba(239,111,46,.4);
+}
+.iconBtn svg{
+  width:20px;height:20px;
+  stroke:white;
+  fill:none;
+  stroke-width:2;
+}
 
-    .actions{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-    .pill{
-      padding:9px 11px;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      color: var(--muted);
-      font-size: 13px;
-      white-space:nowrap;
-    }
-    .btn{
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid rgba(239,111,46,.35);
-      background: linear-gradient(180deg, rgba(239,111,46,.95), rgba(239,111,46,.78));
-      color:#140f0d;
-      font-weight:900;
-      cursor:pointer;
-      white-space:nowrap;
-    }
-    .btn.secondary{
-      background: rgba(0,0,0,.20);
-      border-color: rgba(255,255,255,.14);
-      color: var(--text);
-      font-weight:800;
-    }
-
-    .hero{
-      padding: 16px;
-      display:grid;
-      gap: 10px;
-    }
-    .heroRow{
-      display:flex;
-      gap:14px;
-      align-items:flex-start;
-      justify-content:space-between;
-      flex-wrap:wrap;
-    }
-    .h1{
-      margin:0;
-      font-size:34px;
-      font-weight:900;
-      letter-spacing:.2px;
-    }
-    .lead{
-      margin:0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.5;
-      max-width: 760px;
-    }
-
-    .kpiRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-    .kpi{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.18);
-      border-radius: 999px;
-      padding: 9px 11px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    .kpi b{ color: rgba(255,255,255,.92); }
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      padding: 16px;
-      padding-top: 0;
-    }
-
-    .tile{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      padding: 14px;
-      border-radius: var(--r2);
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      text-decoration:none;
-      color: var(--text);
-      transition: transform .12s ease, border-color .12s ease, background .12s ease;
-      min-height: 76px;
-      outline: none;
-    }
-    .tile:hover{
-      transform: translateY(-1px);
-      border-color: rgba(239,111,46,.35);
-      background: rgba(239,111,46,.10);
-    }
-    .tile:focus-visible{
-      box-shadow: 0 0 0 4px rgba(239,111,46,.14);
-      border-color: rgba(239,111,46,.45);
-    }
-
-    .ico{
-      width:42px;
-      height:42px;
-      border-radius: 14px;
-      display:grid;
-      place-items:center;
-      background: rgba(239,111,46,.14);
-      border:1px solid rgba(239,111,46,.25);
-      flex: 0 0 auto;
-    }
-    .ico svg{
-      width:22px; height:22px;
-      stroke: rgba(255,255,255,.92);
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .tileText{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-      min-width:0;
-    }
-    .tileName{
-      font-weight: 900;
-      font-size: 15px;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-    .tileDesc{
-      font-size: 12px;
-      color: var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
-    }
-
-    .footer{
-      padding: 14px 16px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    @media (max-width: 980px){
-      .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .h1{ font-size: 30px; }
-    }
-    @media (max-width: 520px){
-      .grid{ grid-template-columns: 1fr; }
-      .h1{ font-size: 28px; }
-      .pill{ display:none; }
-    }
-  </style>
+/* Settings menu */
+.settings{
+  position:relative;
+}
+.menu{
+  position:absolute;
+  right:0;
+  top:52px;
+  min-width:160px;
+  background:#1b1918;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:6px;
+  display:none;
+}
+.settings:hover .menu{display:block}
+.menu button{
+  width:100%;
+  background:none;
+  border:none;
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:10px;
+  text-align:left;
+  cursor:pointer;
+}
+.menu button:hover{
+  background:rgba(239,111,46,.15);
+}
+</style>
 </head>
 
 <body>
-  <!-- Preloader -->
-  <div class="loading" id="loading">
-    <div class="loaderCard">
-      <div class="spinner"></div>
-      <div class="loaderText">
-        <b>G7</b>
-        <span>Проверка доступа…</span>
+<div id="loading"><div class="spinner"></div></div>
+
+<div class="topbar" id="app" style="display:none">
+  <div class="logo">
+    <img src="./Logo.png" alt="G7" />
+  </div>
+
+  <div class="nav">
+    <!-- Бутики -->
+    <div class="iconBtn" title="Бутики">
+      <svg viewBox="0 0 24 24"><path d="M3 7h18M5 7l1-3h12l1 3M5 10v10M9 10v10M15 10v10M19 10v10"/></svg>
+    </div>
+
+    <!-- Контакты -->
+    <div class="iconBtn" title="Контакты">
+      <svg viewBox="0 0 24 24"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M9 6h6M9 18h6"/></svg>
+    </div>
+
+    <!-- Инструкции -->
+    <div class="iconBtn" title="Инструкции">
+      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+    </div>
+
+    <!-- Settings -->
+    <div class="settings">
+      <div class="iconBtn" title="Настройки">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.2-2-3.4-2.3.7a7.6 7.6 0 0 0-1.7-1L15 4h-6l-.5 3.1a7.6 7.6 0 0 0-1.7 1L4.5 7.4l-2 3.4L4.5 12a7.8 7.8 0 0 0 .1 2l-2 1.2 2 3.4 2.3-.7a7.6 7.6 0 0 0 1.7 1L9 22h6l.5-3.1a7.6 7.6 0 0 0 1.7-1l2.3.7 2-3.4z"/></svg>
+      </div>
+      <div class="menu">
+        <button>Личный кабинет</button>
+        <button id="logout">Выйти</button>
       </div>
     </div>
   </div>
+</div>
 
-  <!-- Page -->
-  <div class="shell" id="shell" aria-hidden="true">
-    <div class="card topbar">
-      <a class="homeBrand" href="./home.html" title="На главную">
-        <img class="homeLogo" src="./Logo.png" alt="G7" />
-        <div class="brandText">
-          <div class="title">I.B.BORK • G7</div>
-          <div class="sub">Внутренняя платформа</div>
-        </div>
-      </a>
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-      <div class="actions">
-        <div class="pill" id="who">—</div>
-        <button class="btn secondary" id="refresh">Обновить</button>
-        <button class="btn" id="logout">Выйти</button>
-      </div>
-    </div>
+const supabase = createClient(
+  "https://lnmhhdgbfbwkvyeuojra.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubWhoZGdiZmJ3a3Z5ZXVvanJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY4MzYsImV4cCI6MjA4MzIxMjgzNn0.yia-zzBLtLkgPsAOyFFEYu6wiShLGnaaayjVegVydGo"
+);
 
-    <div class="card hero">
-      <div class="heroRow">
-        <div>
-          <h1 class="h1">Главная</h1>
-          <p class="lead">
-            Всё, что нужно для работы группы — в одном месте. Быстрый доступ к разделам, без лишнего шума.
-          </p>
-        </div>
+const { data } = await supabase.auth.getSession();
+if(!data.session) location.replace("../index.html");
 
-        <div class="kpiRow">
-          <div class="kpi"><b>Статус:</b> Online</div>
-          <div class="kpi"><b>Режим:</b> Premium</div>
-          <div class="kpi"><b>Сборка:</b> G7</div>
-        </div>
-      </div>
-    </div>
+document.getElementById("loading").style.display="none";
+document.getElementById("app").style.display="flex";
 
-    <div class="card">
-      <div class="grid" id="grid"></div>
-      <div class="footer">© G7 • Powered by Supabase • GitHub Pages</div>
-    </div>
-  </div>
-
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-
-    const SUPABASE_URL = "https://lnmhhdgbfbwkvyeuojra.supabase.co";
-    const SUPABASE_ANON_KEY =
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxubWhoZGdiZmJ3a3Z5ZXVvanJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc2MzY4MzYsImV4cCI6MjA4MzIxMjgzNn0.yia-zzBLtLkgPsAOyFFEYu6wiShLGnaaayjVegVydGo";
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const $loading = document.getElementById("loading");
-    const $shell = document.getElementById("shell");
-    const $who = document.getElementById("who");
-    const $grid = document.getElementById("grid");
-
-    const icons = {
-      boutiques: `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M4 7h16" />
-          <path d="M6 7l1-3h10l1 3" />
-          <path d="M6 10v10" />
-          <path d="M10 10v10" />
-          <path d="M14 10v10" />
-          <path d="M18 10v10" />
-          <path d="M4 20h16" />
-        </svg>
-      `,
-      contacts: `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M16 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z" />
-          <path d="M9 6h6" />
-          <path d="M9 18h6" />
-        </svg>
-      `,
-      instructions: `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-          <path d="M14 2v6h6" />
-          <path d="M8 13h8" />
-          <path d="M8 17h8" />
-        </svg>
-      `,
-      services: `
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
-          <path d="M19.4 15a7.8 7.8 0 0 0 .1-2l2-1.2-2-3.4-2.3.7a7.6 7.6 0 0 0-1.7-1L15 4h-6l-.5 3.1a7.6 7.6 0 0 0-1.7 1L4.5 7.4l-2 3.4L4.5 12a7.8 7.8 0 0 0 .1 2l-2 1.2 2 3.4 2.3-.7a7.6 7.6 0 0 0 1.7 1L9 22h6l.5-3.1a7.6 7.6 0 0 0 1.7-1l2.3.7 2-3.4z" />
-        </svg>
-      `
-    };
-
-    const tiles = [
-      { key:"boutiques",  name:"Бутики",     desc:"Контакты и карточки по регионам", href:"./boutiques.html" },
-      { key:"contacts",   name:"Контакты",   desc:"Телефоны, WhatsApp, быстрые действия", href:"./contacts.html" },
-      { key:"instructions", name:"Инструкции", desc:"Регламенты, правила, важное", href:"./instructions.html" },
-      { key:"services",   name:"Сервисы",    desc:"Календари, инструменты, формы", href:"./services.html" },
-    ];
-
-    function renderTiles(){
-      $grid.innerHTML = tiles.map(t => `
-        <a class="tile" href="${t.href}">
-          <div class="ico">${icons[t.key]}</div>
-          <div class="tileText">
-            <div class="tileName">${t.name}</div>
-            <div class="tileDesc">${t.desc}</div>
-          </div>
-        </a>
-      `).join("");
-    }
-
-    async function guard(){
-      const { data } = await supabase.auth.getSession();
-      if (!data?.session) window.location.replace("../index.html");
-      return data.session;
-    }
-
-    async function setWho(){
-      const { data } = await supabase.auth.getSession();
-      $who.textContent = data?.session?.user?.email || "—";
-    }
-
-    function reveal(){
-      $loading.style.display = "none";
-      $shell.classList.add("ready");
-      $shell.setAttribute("aria-hidden", "false");
-    }
-
-    document.getElementById("logout").addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      window.location.replace("../index.html");
-    });
-
-    document.getElementById("refresh").addEventListener("click", async () => {
-      await setWho();
-    });
-
-    (async () => {
-      await guard();
-      renderTiles();
-      await setWho();
-      reveal();
-    })();
-  </script>
+document.getElementById("logout").onclick = async ()=>{
+  await supabase.auth.signOut();
+  location.replace("../index.html");
+};
+</script>
 </body>
 </html>
