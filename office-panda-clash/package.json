@@ -1,0 +1,14 @@
+{
+  "name": "office-panda-clash",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone modular 2D fighting game MVP (offline-install friendly)",
+  "scripts": {
+    "dev": "node scripts/dev-server.mjs",
+    "run": "npm run dev",
+    "build": "node scripts/build.mjs",
+    "smoke": "node scripts/smoke-check.mjs",
+    "test": "npm run smoke"
+  }
+}

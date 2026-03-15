@@ -1,0 +1,6 @@
+{
+  "id": "neon-office",
+  "layers": ["bg.png", "mid.png", "fg.png"],
+  "vfxHooks": ["ambient", "impact"],
+  "paletteLut": "palette.png"
+}
