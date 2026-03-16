@@ -4,6 +4,7 @@ const files = [
   'index.html',
   'src/main.js',
   'src/systems/game.js',
+  'src/systems/aiController.js',
   'src/battle/match.js',
   'src/battle/fighter.js',
   'src/data/fighters/registry.js',
@@ -19,4 +20,4 @@ for (const file of files) {
   await access(new URL(`../${file}`, import.meta.url));
 }
 
-console.log('[smoke] Core source, data registries, assets and scripts are present.');
+console.log('[smoke] Core source, AI, registries, assets and scripts are present.');

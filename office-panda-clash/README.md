@@ -56,6 +56,8 @@ npm test
 - Actions: walk, crouch, jump, block high/low, dash, dodge, jab, kick, uppercut, sweep, throw, special.
 - States: hitstun, blockstun, knockdown/get-up, finish window, BORKALITY input.
 - Data-driven registries for fighters/stages/moves.
+- AI rival controller: spacing, pressure, reactive block, random attack cadence.
+- Enhanced placeholder visuals: parallax layers, ambient particles, hit sparks, and camera shake.
 
 ---
 

@@ -5,12 +5,14 @@ import { stageRegistry } from '../data/stages/registry.js';
 import { InputBuffer } from '../input/controls.js';
 import { PlaceholderRenderer } from '../rendering/placeholderRenderer.js';
 import { SceneController } from '../scenes/sceneController.js';
+import { AIController } from './aiController.js';
 
 export class Game {
   constructor(root) {
     this.renderer = new PlaceholderRenderer(root);
     this.input = new InputBuffer();
     this.scenes = new SceneController(this.renderer);
+    this.ai = new AIController();
     this.match = null;
     this.overlay = undefined;
     this.overlayTimeout = 0;
@@ -61,13 +63,23 @@ export class Game {
       setState({ winner, scene: 'result' });
       this.showOverlay(`WINNER: ${String(winner).toUpperCase()}`);
     });
+    this.match.events.on(GameEvents.HIT_CONFIRMED, ({ attacker }) => {
+      const target = attacker === 1 ? this.match.p2 : this.match.p1;
+      this.renderer.triggerHitSpark(target.x, target.y - 130, '#ffe082');
+    });
+    this.match.events.on(GameEvents.BLOCKED, ({ attacker }) => {
+      const target = attacker === 1 ? this.match.p2 : this.match.p1;
+      this.renderer.triggerHitSpark(target.x, target.y - 140, '#7fd6ff');
+    });
   }
 
   showOverlay(text) { this.overlay = text; this.overlayTimeout = 120; }
 
   tick() {
+    this.renderer.update();
     if (this.match && (appState.scene === 'battle' || appState.scene === 'training')) {
       this.applyControlInput();
+      this.ai.update(this.match);
       this.match.update();
 
       const stage = stageRegistry.find((s) => s.id === appState.stage);
@@ -85,6 +97,9 @@ export class Game {
 
   applyControlInput() {
     const p1 = this.match.p1;
+    const p2 = this.match.p2;
+    p1.facing = p1.x < p2.x ? 1 : -1;
+
     if (this.input.is('moveLeft')) { p1.x -= p1.config.stats.walkSpeed; p1.state.set('walk'); }
     if (this.input.is('moveRight')) { p1.x += p1.config.stats.walkSpeed; p1.state.set('walk'); }
     if (this.input.is('crouch')) p1.state.set('crouch');
@@ -93,12 +108,13 @@ export class Game {
     if (this.input.is('dash')) p1.x += p1.config.stats.dashSpeed;
     if (this.input.is('dodge')) p1.x -= p1.config.stats.dashSpeed * 0.7;
 
-    if (this.input.is('jab')) this.match.triggerMove(1, 'jab', false);
-    if (this.input.is('kick')) this.match.triggerMove(1, 'kick', false);
-    if (this.input.is('uppercut')) this.match.triggerMove(1, 'uppercut', false);
-    if (this.input.is('sweep')) this.match.triggerMove(1, 'sweep', false);
-    if (this.input.is('throw')) this.match.triggerMove(1, 'throw', false);
-    if (this.input.is('special')) this.match.triggerMove(1, 'special', false);
+    const p2Blocking = p2.state.state === 'blockHigh' || p2.state.state === 'blockLow';
+    if (this.input.is('jab')) this.match.triggerMove(1, 'jab', p2Blocking);
+    if (this.input.is('kick')) this.match.triggerMove(1, 'kick', p2Blocking);
+    if (this.input.is('uppercut')) this.match.triggerMove(1, 'uppercut', p2Blocking);
+    if (this.input.is('sweep')) this.match.triggerMove(1, 'sweep', p2Blocking);
+    if (this.input.is('throw')) this.match.triggerMove(1, 'throw', p2Blocking);
+    if (this.input.is('special')) this.match.triggerMove(1, 'special', p2Blocking);
 
     if (this.input.is('b1') && this.input.is('b2') && this.input.is('b3') && this.input.is('b4') && this.match.finishWindow) {
       this.showOverlay(p1.config.borkalityTitle);
@@ -106,5 +122,11 @@ export class Game {
     }
 
     if (p1.state.state === 'walk' && !this.input.is('moveLeft') && !this.input.is('moveRight')) p1.state.set('idle');
+    p1.x = clamp(p1.x, 80, 1200);
+    p2.x = clamp(p2.x, 80, 1200);
   }
+}
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
 }
