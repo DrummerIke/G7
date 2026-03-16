@@ -1,74 +1,148 @@
-# Office Panda Clash (standalone subproject)
+# Office Panda Clash (отдельный подпроект)
 
-Production-oriented modular MVP of a 2D arcade fighter with office pandas.
+Production-ready основа 2D fighting game с офисными пандами.
 
-## Why install failed before (403)
-The previous revision depended on external npm packages (`vite`, `pixi.js`, `zustand`, `electron`, `@types/node`).
-In this sandbox, npm is forced through proxy env config (`http-proxy=http://proxy:8080`) and package downloads from npm registry returned `403 Forbidden`.
+## Зачем проект dependency-free
+В прошлой версии использовались внешние npm-зависимости (`vite`, `pixi.js`, `zustand`, `electron`, `@types/node`).
+В sandbox-окружении с прокси (`http-proxy=http://proxy:8080`) скачивание из npm registry иногда возвращает `403 Forbidden`.
 
-To guarantee a runnable pipeline, the subproject is now dependency-free (browser ES modules + Node built-in scripts), so `npm install` completes without external downloads.
+Чтобы пайплайн запускался стабильно, текущая версия работает без внешних пакетов (чистые browser ES modules + Node built-ins).
 
 ---
 
-## Quick start (Windows / PowerShell)
+## Быстрый запуск (Windows / PowerShell)
 ```powershell
 cd office-panda-clash
 npm install
 npm run dev
 ```
-Open: `http://127.0.0.1:5173`
+Открыть в браузере: `http://127.0.0.1:5173`
 
-Stop server with `Ctrl + C`.
+Остановить сервер: `Ctrl + C`.
 
-## Build (production web bundle)
+## Сборка web-версии
 ```powershell
 cd office-panda-clash
 npm install
 npm run build
 ```
-Output: `office-panda-clash/dist/`
+Результат: `office-panda-clash/dist/`
 
-## Desktop-oriented package (no external packager)
+## Desktop-пакет (без внешнего packager)
 ```powershell
 cd office-panda-clash
 npm install
 npm run build:desktop
 ```
-Output: `office-panda-clash/desktop-build/`
+Результат: `office-panda-clash/desktop-build/`
 
-- Windows run script: `desktop-build\run-desktop.bat`
-- Linux/macOS run script: `desktop-build/run-desktop.sh`
+- Windows: `desktop-build\run-desktop.bat`
+- Linux/macOS: `desktop-build/run-desktop.sh`
 
-This package serves the built app locally and opens it in the default browser.
+---
 
-## Validation
+## Текущий MVP scope
+- Экраны: Main Menu, Fighter Select, Stage Select, Versus, Battle, Result, Training.
+- Бой: 1v1, таймер, HP, Best of 3.
+- Действия: ходьба, присед, прыжок, блок high/low, дэш, додж, jab/kick/uppercut/sweep/throw/special.
+- Состояния: hitstun, blockstun, knockdown/get-up, finish window, BORKALITY input.
+- AI соперник: дистанция, pressure-режим, реактивный блок, случайный паттерн атак.
+- Улучшенный placeholder-визуал: parallax, ambient particles, hit sparks, screen shake.
+
+---
+
+## Как загрузить визуальные модели/спрайты и какие требования
+
+> В этом проекте под “визуальные модели” подразумеваются 2D ассеты (sprite sheets/atlases + JSON-конфиги), которые подменяют placeholder-рендер без переписывания логики.
+
+### 1) Куда класть файлы
+Для каждого бойца:
+- `src/assets/fighters/<fighter>/atlas.png` *(добавляете вы)*
+- `src/assets/fighters/<fighter>/animations.json`
+- `src/assets/fighters/<fighter>/frame-config.json`
+
+Поддерживаемые fighter-id:
+- `it`, `chef`, `clerk`, `secretary`, `boss`
+
+Для арен:
+- `src/assets/stages/<stage>/config.json`
+- дополнительные слои (например `bg.png`, `mid.png`, `fg.png`) кладутся рядом
+
+Поддерживаемые stage-id:
+- `temple-night`, `neon-office`, `red-garden`
+
+VFX:
+- `src/assets/vfx/` (sparks, overlays, shake presets)
+
+### 2) Минимальные требования к файлам бойца
+
+#### `atlas.png`
+- Формат: PNG (RGBA)
+- Рекомендуемый старт: power-of-two (например 2048x2048)
+- Желательно единый масштаб между всеми бойцами
+- Прозрачный фон
+
+#### `animations.json`
+Обязательные поля:
+- `fighter` — id бойца
+- `atlas` — путь к атласу
+- `states` — набор состояний
+
+Минимальный набор состояний для полноценного боя:
+- `idle`, `walk`, `crouch`, `jump`, `blockHigh`, `blockLow`, `dash`, `dodge`,
+- `jab`, `kick`, `uppercut`, `sweep`, `throw`, `special`,
+- `hitstun`, `knockdown`, `getup`, `victory`, `defeat`
+
+Для каждого состояния:
+- `fps` — скорость анимации
+- `frames` — индексы кадров
+
+#### `frame-config.json`
+Обязательные поля:
+- `frameSize` (`w`, `h`) — единый размер кадра
+- `pivot` (`x`, `y`) — точка опоры (обычно `x=0.5`, `y≈0.85..0.95`)
+- `hitboxes` — ссылка на hitbox-данные (json)
+
+### 3) Требования к качеству графики
+- Стиль: серьёзный arcade fighter, не мультяшный, не детский.
+- Читаемые силуэты в движении (особенно стойка, прыжок, атака, блок).
+- Контрастные формы рук/ног на атакующих кадрах.
+- Для спец-атак — отдельные яркие VFX-кадры/оверлеи.
+
+### 4) Чек-лист перед интеграцией
+1. Имена папок и id совпадают с registry.
+2. Все обязательные состояния есть в `animations.json`.
+3. Pivot не “прыгает” между состояниями.
+4. Размер hitbox не выходит за логику move-рейнджа.
+5. После замены ассетов проходит `npm run smoke` и `npm run build`.
+
+### 5) Что нужно доработать в коде для полного runtime-подключения финальных спрайтов
+Сейчас используется canvas placeholder-слой. Для production art pipeline следующим шагом:
+- добавить загрузчик atlas/frames в `src/rendering/placeholderRenderer.js` (или выделить `spriteRenderer.js`),
+- читать `animations.json`/`frame-config.json` во время инициализации бойца,
+- переключать кадры по state machine, не меняя `battle/*` и `systems/game.js`.
+
+Таким образом логика боя и AI остаются прежними, меняется только rendering backend.
+
+---
+
+## Проверка проекта
 ```powershell
 npm run smoke
 npm test
 ```
-(`npm test` aliases smoke-check)
+(`npm test` = smoke-check)
 
 ---
 
-## Current MVP scope
-- Screens: Main Menu, Fighter Select, Stage Select, Versus, Battle, Result, Training.
-- Fight core: 1v1, timer, HP bars, Bo3 rounds.
-- Actions: walk, crouch, jump, block high/low, dash, dodge, jab, kick, uppercut, sweep, throw, special.
-- States: hitstun, blockstun, knockdown/get-up, finish window, BORKALITY input.
-- Data-driven registries for fighters/stages/moves.
-- AI rival controller: spacing, pressure, reactive block, random attack cadence.
-- Enhanced placeholder visuals: parallax layers, ambient particles, hit sparks, and camera shake.
-
----
-
-## Project structure
+## Структура проекта
 ```text
 office-panda-clash/
   index.html
   scripts/
-    dev-server.mjs        # local dev server
-    build.mjs             # builds dist/
-    package-desktop.mjs   # builds desktop-build/
+    dev-server.mjs
+    build.mjs
+    package-desktop.mjs
     smoke-check.mjs
   src/
     animation/
@@ -88,17 +162,3 @@ office-panda-clash/
       stages/<stage>/config.json
       vfx/
 ```
-
----
-
-## Where to extend art and combat
-1. **Fighter visuals + timing**
-   - `src/assets/fighters/<fighter>/animations.json`
-   - `src/assets/fighters/<fighter>/frame-config.json`
-   - Add atlases/sprite sheets and per-frame hitbox timing.
-2. **Stage visual depth**
-   - `src/assets/stages/<stage>/config.json`
-   - Add layered backgrounds, palette LUTs, ambient hooks.
-3. **VFX polish**
-   - `src/assets/vfx/`
-   - Add hit sparks, camera shake curves, finish and borkality overlays.
