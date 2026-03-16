@@ -42,6 +42,21 @@ npm run build:desktop
 - Windows: `desktop-build\run-desktop.bat`
 - Linux/macOS: `desktop-build/run-desktop.sh`
 
+
+## Как «выложить» текущую версию
+Собрать готовый релизный пакет в папку `release/`:
+
+```bash
+npm run release
+```
+
+После команды появится:
+- `release/office-panda-clash-v<version>/desktop-build/`
+- `release/office-panda-clash-v<version>/dist/`
+- `release/office-panda-clash-v<version>/RUN.md`
+
+Это и есть готовая папка для передачи/публикации.
+
 ## Проверки
 ```bash
 npm run smoke

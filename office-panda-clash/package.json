@@ -10,6 +10,7 @@
     "build": "node scripts/build.mjs",
     "smoke": "node scripts/smoke-check.mjs",
     "test": "npm run smoke",
-    "build:desktop": "npm run build && node scripts/package-desktop.mjs"
+    "build:desktop": "npm run build && node scripts/package-desktop.mjs",
+    "release": "npm run build:desktop && node scripts/release.mjs"
   }
 }
