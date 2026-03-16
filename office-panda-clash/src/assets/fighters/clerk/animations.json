@@ -1,0 +1,9 @@
+{
+  "fighter": "clerk",
+  "atlas": "assets/fighters/clerk/atlas.png",
+  "states": {
+    "idle": {"fps": 8, "frames": [0,1,2,3]},
+    "walk": {"fps": 10, "frames": [4,5,6,7]},
+    "attack": {"fps": 12, "frames": [8,9,10]}
+  }
+}
