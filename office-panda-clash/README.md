@@ -57,6 +57,21 @@ npm run release
 
 Это и есть готовая папка для передачи/публикации.
 
+
+## Почему файлов может не быть на GitHub
+Изменения появляются на GitHub только после `git push` в удалённый репозиторий.
+Проверка готовности к публикации:
+
+```bash
+npm run publish:check
+```
+
+Публикация:
+
+```bash
+git push -u origin $(git rev-parse --abbrev-ref HEAD)
+```
+
 ## Проверки
 ```bash
 npm run smoke
