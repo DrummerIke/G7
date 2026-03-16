@@ -19,7 +19,16 @@ export class MatchController {
   }
 
   startRound() {
+    this.finishWindow = false;
     this.timer = 99;
+    this.p1.hp = this.p1.config.stats.maxHp;
+    this.p2.hp = this.p2.config.stats.maxHp;
+    this.p1.x = 380;
+    this.p2.x = 900;
+    this.p1.stun = 0;
+    this.p2.stun = 0;
+    this.p1.state.set('idle');
+    this.p2.state.set('idle');
     this.events.emit(GameEvents.ROUND_STARTED, { round: this.round });
   }
 
@@ -53,18 +62,20 @@ export class MatchController {
   }
 
   endRound() {
-    const p1Wins = this.p1.hp >= this.p2.hp;
-    if (p1Wins) this.rounds.p1 += 1;
+    const p1WinsRound = this.p1.hp >= this.p2.hp;
+    if (p1WinsRound) this.rounds.p1 += 1;
     else this.rounds.p2 += 1;
-    this.round += 1;
 
     if (this.rounds.p1 >= 2 || this.rounds.p2 >= 2) {
       this.finished = true;
-      this.events.emit(GameEvents.MATCH_FINISHED, { winner: p1Wins ? this.p1.config.id : this.p2.config.id });
-    } else {
-      this.p1.hp = this.p1.config.stats.maxHp;
-      this.p2.hp = this.p2.config.stats.maxHp;
-      this.startRound();
+      const p1WinsMatch = this.rounds.p1 > this.rounds.p2;
+      this.p1.state.set(p1WinsMatch ? 'victory' : 'defeat');
+      this.p2.state.set(p1WinsMatch ? 'defeat' : 'victory');
+      this.events.emit(GameEvents.MATCH_FINISHED, { winner: p1WinsMatch ? this.p1.config.id : this.p2.config.id });
+      return;
     }
+
+    this.round += 1;
+    this.startRound();
   }
 }

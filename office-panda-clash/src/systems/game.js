@@ -1,25 +1,41 @@
 import { MatchController } from '../battle/match.js';
 import { GameEvents } from '../core/events.js';
 import { appState, setState } from '../core/store.js';
+import { fighterRegistry } from '../data/fighters/registry.js';
 import { stageRegistry } from '../data/stages/registry.js';
 import { InputBuffer } from '../input/controls.js';
 import { PlaceholderRenderer } from '../rendering/placeholderRenderer.js';
+import { SpritePipeline } from '../rendering/spritePipeline.js';
 import { SceneController } from '../scenes/sceneController.js';
 import { AIController } from './aiController.js';
 
 export class Game {
   constructor(root) {
     this.renderer = new PlaceholderRenderer(root);
+    this.spritePipeline = new SpritePipeline();
     this.input = new InputBuffer();
     this.scenes = new SceneController(this.renderer);
     this.ai = new AIController();
     this.match = null;
     this.overlay = undefined;
     this.overlayTimeout = 0;
+    this.trainingMode = false;
 
+    this.preloadAssetConfigs();
     this.bindMenuInput();
     this.scenes.render('mainMenu');
     requestAnimationFrame(() => this.tick());
+  }
+
+  async preloadAssetConfigs() {
+    try {
+      await Promise.all([
+        ...fighterRegistry.map((f) => this.spritePipeline.preloadFighter(f.id, f.animationConfigPath, f.frameConfigPath)),
+        ...stageRegistry.map((s) => this.spritePipeline.preloadStage(s.id, s.configPath))
+      ]);
+    } catch (error) {
+      console.warn('[sprite-pipeline] config preload failed:', error);
+    }
   }
 
   bindMenuInput() {
@@ -29,16 +45,24 @@ export class Game {
         if (scene === 'mainMenu') setState({ scene: 'fighterSelect' });
         else if (scene === 'fighterSelect') setState({ scene: 'stageSelect' });
         else if (scene === 'stageSelect') setState({ scene: 'versus' });
-        else if (scene === 'versus') { setState({ scene: 'battle' }); this.createMatch(false); }
-        else if (scene === 'result') setState({ scene: 'mainMenu', winner: null });
+        else if (scene === 'versus') {
+          this.trainingMode = false;
+          setState({ scene: 'battle' });
+          this.createMatch(false);
+        } else if (scene === 'result') setState({ scene: 'mainMenu', winner: null });
       }
 
-      if (e.code === 'KeyT' && scene === 'mainMenu') { setState({ scene: 'training' }); this.createMatch(true); }
+      if (e.code === 'KeyT' && scene === 'mainMenu') {
+        this.trainingMode = true;
+        setState({ scene: 'training' });
+        this.createMatch(true);
+      }
       if (e.code === 'Escape' && scene === 'training') setState({ scene: 'mainMenu' });
 
       if (scene === 'fighterSelect' && /^Digit[1-5]$/.test(e.code)) {
         const pick = ['it', 'chef', 'clerk', 'secretary', 'boss'][Number(e.code.slice(-1)) - 1];
-        if (e.shiftKey) setState({ p2: pick }); else setState({ p1: pick });
+        if (e.shiftKey) setState({ p2: pick });
+        else setState({ p1: pick });
         this.scenes.render('fighterSelect');
       }
 
@@ -53,10 +77,11 @@ export class Game {
 
   createMatch(training) {
     this.match = new MatchController(appState.p1, appState.p2);
-    this.overlay = training ? 'TRAINING' : 'ROUND 1';
-    this.overlayTimeout = 100;
+    this.overlay = training ? 'TRAINING MODE' : 'ROUND 1';
+    this.overlayTimeout = 120;
     this.match.startRound();
 
+    this.match.events.on(GameEvents.ROUND_STARTED, ({ round }) => this.showOverlay(`ROUND ${round}`));
     this.match.events.on(GameEvents.FINISH_HIM, () => this.showOverlay('FINISH HIM'));
     this.match.events.on(GameEvents.BORKALITY_AVAILABLE, () => this.showOverlay('BORKALITY READY'));
     this.match.events.on(GameEvents.MATCH_FINISHED, ({ winner }) => {
@@ -73,13 +98,16 @@ export class Game {
     });
   }
 
-  showOverlay(text) { this.overlay = text; this.overlayTimeout = 120; }
+  showOverlay(text) {
+    this.overlay = text;
+    this.overlayTimeout = 120;
+  }
 
   tick() {
     this.renderer.update();
     if (this.match && (appState.scene === 'battle' || appState.scene === 'training')) {
       this.applyControlInput();
-      this.ai.update(this.match);
+      if (!this.trainingMode) this.ai.update(this.match);
       this.match.update();
 
       const stage = stageRegistry.find((s) => s.id === appState.stage);
@@ -100,13 +128,25 @@ export class Game {
     const p2 = this.match.p2;
     p1.facing = p1.x < p2.x ? 1 : -1;
 
-    if (this.input.is('moveLeft')) { p1.x -= p1.config.stats.walkSpeed; p1.state.set('walk'); }
-    if (this.input.is('moveRight')) { p1.x += p1.config.stats.walkSpeed; p1.state.set('walk'); }
+    if (this.input.is('moveLeft')) {
+      p1.x -= p1.config.stats.walkSpeed;
+      p1.state.set('walk');
+    }
+    if (this.input.is('moveRight')) {
+      p1.x += p1.config.stats.walkSpeed;
+      p1.state.set('walk');
+    }
     if (this.input.is('crouch')) p1.state.set('crouch');
-    if (this.input.is('jump') && p1.y >= 530) { p1.vy = -p1.config.stats.jumpForce; p1.state.set('jump'); }
-    if (this.input.is('block')) p1.state.set('blockHigh');
+    if (this.input.is('jump') && p1.y >= 530) {
+      p1.vy = -p1.config.stats.jumpForce;
+      p1.state.set('jump');
+    }
+    if (this.input.is('block')) p1.state.set(this.input.is('crouch') ? 'blockLow' : 'blockHigh');
     if (this.input.is('dash')) p1.x += p1.config.stats.dashSpeed;
-    if (this.input.is('dodge')) p1.x -= p1.config.stats.dashSpeed * 0.7;
+    if (this.input.is('dodge')) {
+      p1.x -= p1.config.stats.dashSpeed * 0.7;
+      p1.state.set('dodge');
+    }
 
     const p2Blocking = p2.state.state === 'blockHigh' || p2.state.state === 'blockLow';
     if (this.input.is('jab')) this.match.triggerMove(1, 'jab', p2Blocking);

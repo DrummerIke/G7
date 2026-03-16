@@ -1,3 +1,5 @@
+import { HudRenderer } from '../ui/hud.js';
+
 export class PlaceholderRenderer {
   constructor(root) {
     this.canvas = document.createElement('canvas');
@@ -5,6 +7,7 @@ export class PlaceholderRenderer {
     this.canvas.height = 720;
     root.appendChild(this.canvas);
     this.ctx = this.canvas.getContext('2d');
+    this.hud = new HudRenderer();
     this.time = 0;
     this.cameraShake = 0;
     this.sparks = [];
@@ -28,15 +31,7 @@ export class PlaceholderRenderer {
     for (let i = 0; i < 12; i += 1) {
       const angle = (Math.PI * 2 * i) / 12 + Math.random() * 0.3;
       const speed = 2 + Math.random() * 6;
-      this.sparks.push({
-        x,
-        y,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed - 1,
-        life: 16 + Math.floor(Math.random() * 8),
-        size: 2 + Math.random() * 4,
-        color
-      });
+      this.sparks.push({ x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 1, life: 16 + Math.floor(Math.random() * 8), size: 2 + Math.random() * 4, color });
     }
   }
 
@@ -108,11 +103,6 @@ export class PlaceholderRenderer {
       ctx.fill();
     }
 
-    this.drawSparks();
-  }
-
-  drawSparks() {
-    const { ctx } = this;
     this.sparks.forEach((spark) => {
       ctx.fillStyle = spark.color;
       ctx.beginPath();
@@ -123,7 +113,9 @@ export class PlaceholderRenderer {
 
   drawFighter(fighter) {
     const { ctx } = this;
-    const crouchOffset = fighter.state.state === 'crouch' ? 28 : 0;
+    const crouchOffset = fighter.state.state === 'crouch' || fighter.state.state === 'blockLow' ? 28 : 0;
+    const attackLean = fighter.state.state === 'attack' ? 12 : 0;
+    const armSwing = fighter.state.state === 'attack' ? 18 : 0;
 
     ctx.save();
     ctx.translate(fighter.x, fighter.y + crouchOffset);
@@ -138,30 +130,61 @@ export class PlaceholderRenderer {
     bodyGradient.addColorStop(0, fighter.config.palette.accent);
     bodyGradient.addColorStop(1, fighter.config.palette.primary);
     ctx.fillStyle = bodyGradient;
-    roundRect(ctx, -45, -160, 90, 160, 20);
+    roundRect(ctx, -50 + attackLean, -158, 100, 148, 28);
     ctx.fill();
 
     ctx.fillStyle = '#f8f8f8';
-    roundRect(ctx, -33, -145, 66, 66, 18);
+    roundRect(ctx, -30 + attackLean, -142, 60, 62, 18);
     ctx.fill();
 
+    // panda head + ears
     ctx.fillStyle = fighter.config.palette.accent;
     ctx.beginPath();
-    ctx.arc(0, -175, 38, 0, Math.PI * 2);
+    ctx.arc(0 + attackLean * 0.4, -175, 40, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-24 + attackLean * 0.4, -204, 15, 0, Math.PI * 2);
+    ctx.arc(24 + attackLean * 0.4, -204, 15, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.fillStyle = '#111111';
     ctx.beginPath();
-    ctx.arc(-10, -178, 5, 0, Math.PI * 2);
-    ctx.arc(10, -178, 5, 0, Math.PI * 2);
+    ctx.arc(-10 + attackLean * 0.3, -178, 5, 0, Math.PI * 2);
+    ctx.arc(10 + attackLean * 0.3, -178, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // paws/arms
+    ctx.fillStyle = fighter.config.palette.primary;
+    roundRect(ctx, -74 + attackLean, -132, 26, 68, 14);
+    roundRect(ctx, 48 + attackLean, -132, 26, 68, 14);
+    ctx.fill();
+    ctx.fillStyle = '#111111';
+    ctx.beginPath();
+    ctx.arc(60 + attackLean + armSwing, -64, 14, 0, Math.PI * 2);
+    ctx.arc(-60 + attackLean, -64, 14, 0, Math.PI * 2);
+    ctx.fill();
+
+    // panda legs
+    ctx.fillStyle = '#141414';
+    roundRect(ctx, -40, -22, 28, 42, 12);
+    roundRect(ctx, 12, -22, 28, 42, 12);
     ctx.fill();
 
     if (fighter.state.state === 'attack') {
       ctx.strokeStyle = '#ffd166';
       ctx.lineWidth = 5;
       ctx.beginPath();
-      ctx.arc(38, -120, 24, -0.7, 0.9);
+      ctx.arc(52, -118, 28, -0.9, 1.0);
       ctx.stroke();
+    }
+
+    if (fighter.state.state === 'victory') {
+      ctx.fillStyle = '#7bffba';
+      ctx.fillRect(-55, -220, 110, 8);
+    }
+    if (fighter.state.state === 'defeat') {
+      ctx.fillStyle = '#ff5a82';
+      ctx.fillRect(-55, -220, 110, 8);
     }
 
     if (fighter.stun > 0) {
@@ -173,44 +196,7 @@ export class PlaceholderRenderer {
   }
 
   drawHud(timer, hp1, hp2, rounds, overlay) {
-    const { ctx } = this;
-
-    ctx.fillStyle = addAlpha('#05070d', 0.75);
-    roundRect(ctx, 28, 20, 1225, 72, 14);
-    ctx.fill();
-
-    ctx.fillStyle = '#15181f';
-    ctx.fillRect(40, 30, 500, 26);
-    ctx.fillRect(740, 30, 500, 26);
-
-    const hp1Grad = ctx.createLinearGradient(42, 0, 540, 0);
-    hp1Grad.addColorStop(0, '#3bdba2');
-    hp1Grad.addColorStop(1, '#77ffd0');
-    ctx.fillStyle = hp1Grad;
-    ctx.fillRect(42, 32, Math.max(0, (hp1 / 1500) * 496), 22);
-
-    const hp2Width = Math.max(0, (hp2 / 1500) * 496);
-    const hp2Grad = ctx.createLinearGradient(742, 0, 1240, 0);
-    hp2Grad.addColorStop(0, '#ff8ab5');
-    hp2Grad.addColorStop(1, '#ff4c82');
-    ctx.fillStyle = hp2Grad;
-    ctx.fillRect(742 + (496 - hp2Width), 32, hp2Width, 22);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 34px Segoe UI';
-    ctx.fillText(`${Math.ceil(timer)}`, 615, 50);
-    ctx.font = '18px Segoe UI';
-    ctx.fillStyle = '#cfd8ff';
-    ctx.fillText(`R:${rounds.p1}-${rounds.p2}`, 610, 80);
-
-    if (overlay) {
-      ctx.fillStyle = addAlpha('#ffd166', 0.15);
-      roundRect(ctx, 316, 190, 650, 112, 18);
-      ctx.fill();
-      ctx.fillStyle = '#ffd166';
-      ctx.font = '800 56px Segoe UI';
-      ctx.fillText(overlay, 340, 266);
-    }
+    this.hud.draw(this.ctx, timer, hp1, hp2, rounds, overlay);
   }
 
   drawSceneCard(title, lines) {

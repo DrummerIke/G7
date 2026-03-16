@@ -2,8 +2,157 @@
   "fighter": "chef",
   "atlas": "assets/fighters/chef/atlas.png",
   "states": {
-    "idle": {"fps": 8, "frames": [0,1,2,3]},
-    "walk": {"fps": 10, "frames": [4,5,6,7]},
-    "attack": {"fps": 12, "frames": [8,9,10]}
+    "idle": {
+      "fps": 8,
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "walk": {
+      "fps": 10,
+      "frames": [
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "crouch": {
+      "fps": 8,
+      "frames": [
+        11,
+        12,
+        13
+      ]
+    },
+    "jump": {
+      "fps": 10,
+      "frames": [
+        14,
+        15,
+        16
+      ]
+    },
+    "blockHigh": {
+      "fps": 8,
+      "frames": [
+        17,
+        18
+      ]
+    },
+    "blockLow": {
+      "fps": 8,
+      "frames": [
+        19,
+        20
+      ]
+    },
+    "dash": {
+      "fps": 12,
+      "frames": [
+        21,
+        22,
+        23
+      ]
+    },
+    "dodge": {
+      "fps": 12,
+      "frames": [
+        24,
+        25
+      ]
+    },
+    "jab": {
+      "fps": 14,
+      "frames": [
+        26,
+        27,
+        28
+      ]
+    },
+    "kick": {
+      "fps": 13,
+      "frames": [
+        29,
+        30,
+        31
+      ]
+    },
+    "uppercut": {
+      "fps": 12,
+      "frames": [
+        32,
+        33,
+        34
+      ]
+    },
+    "sweep": {
+      "fps": 12,
+      "frames": [
+        35,
+        36,
+        37
+      ]
+    },
+    "throw": {
+      "fps": 11,
+      "frames": [
+        38,
+        39,
+        40
+      ]
+    },
+    "special": {
+      "fps": 11,
+      "frames": [
+        41,
+        42,
+        43,
+        44
+      ]
+    },
+    "hitstun": {
+      "fps": 9,
+      "frames": [
+        45,
+        46
+      ]
+    },
+    "knockdown": {
+      "fps": 8,
+      "frames": [
+        47,
+        48,
+        49
+      ]
+    },
+    "getup": {
+      "fps": 10,
+      "frames": [
+        50,
+        51,
+        52
+      ]
+    },
+    "victory": {
+      "fps": 9,
+      "frames": [
+        53,
+        54,
+        55,
+        56
+      ]
+    },
+    "defeat": {
+      "fps": 6,
+      "frames": [
+        57,
+        58,
+        59
+      ]
+    }
   }
 }
