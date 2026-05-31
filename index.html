@@ -8,7 +8,7 @@
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <script>
-    const APP_VERSION = "2026-05-31-roles-1";
+    const APP_VERSION = "2026-05-31-login-fallback-1";
     const storedVersion = localStorage.getItem("g7:version");
     if (storedVersion !== APP_VERSION) {
       localStorage.setItem("g7:version", APP_VERSION);
@@ -137,8 +137,8 @@
   <div class="card">
     <h1>G7 — Вход</h1>
 
-    <label for="login">Логин</label>
-    <input id="login" autocomplete="username" placeholder="chig" />
+    <label for="login">Логин или email</label>
+    <input id="login" autocomplete="username" placeholder="chig или name@example.com" />
 
     <label for="password">Пароль</label>
     <input id="password" type="password" autocomplete="current-password" placeholder="••••••••••••" />
@@ -183,11 +183,38 @@
       }
     })();
 
+    const LOGIN_ALIASES = {
+      // Временные локальные алиасы можно добавлять здесь, пока админка пользователей в работе.
+      // Пример: chig: "name@example.com"
+    };
+
+    function isEmail(value){
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+    }
+
     async function resolveLogin(login){
-      const res = await supabase.functions.invoke("resolve_login", { body:{ login } });
-      if (res.error) throw new Error("resolve_login failed");
-      if (!res.data?.email) throw new Error("login_not_found");
-      return res.data.email;
+      if (isEmail(login)) return login;
+      if (LOGIN_ALIASES[login]) return LOGIN_ALIASES[login];
+
+      const functionRes = await supabase.functions
+        .invoke("resolve_login", { body:{ login } })
+        .catch((error) => ({ error }));
+      if (functionRes.data?.email) return functionRes.data.email;
+
+      const profileRes = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("login", login)
+        .maybeSingle()
+        .catch((error) => ({ error }));
+
+      if (profileRes.data?.email) return profileRes.data.email;
+
+      if (functionRes.error || profileRes.error) {
+        throw new Error("Не удалось найти email для этого логина. Попробуйте войти по email или проверьте настройку resolve_login/profiles.");
+      }
+
+      throw new Error("Логин не найден");
     }
 
     btn.onclick = async () => {
