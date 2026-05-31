@@ -3,12 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>G7</title>
+  <title>G7 — Бутики</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <script>
+    const APP_VERSION = "2026-05-31-roles-1";
+    const storedVersion = localStorage.getItem("g7:version");
+    if (storedVersion !== APP_VERSION) {
+      localStorage.setItem("g7:version", APP_VERSION);
+      const nextUrl = new URL(window.location.href);
+      nextUrl.searchParams.set("v", APP_VERSION);
+      if ("caches" in window) {
+        caches.keys()
+          .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
+          .finally(() => window.location.replace(nextUrl.toString()));
+      } else {
+        window.location.replace(nextUrl.toString());
+      }
+    }
+  </script>
 </head>
 <body style="margin:0;min-height:100svh;display:grid;place-items:center;background:#151312;color:#fff;font-family:Nunito,system-ui;">
   <div style="padding:18px;border:1px solid rgba(255,255,255,.12);border-radius:18px;background:rgba(255,255,255,.04);max-width:720px">
-    <h1 style="margin:0 0 10px">Раздел в работе</h1>
-    <p style="margin:0;color:rgba(255,255,255,.7)">Скоро здесь будет контент. Вернуться на <a href="./home.html" style="color:#ef6f2e;text-decoration:none;font-weight:800">Главную</a>.</p>
+    <h1 style="margin:0 0 10px">Бутики</h1>
+    <p style="margin:0;color:rgba(255,255,255,.7)">Первое направление добавлено. Следующим шагом подключим задачи, роли и рабочие экраны. Вернуться на <a href="./home.html" style="color:#ef6f2e;text-decoration:none;font-weight:800">Главную</a>.</p>
   </div>
 </body>
 </html>
